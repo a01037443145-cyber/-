@@ -11,7 +11,6 @@
         body { font-family: 'Pretendard', sans-serif; }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-thumb { border-radius: 3px; }
-        /* 라이트 모드일 때 시간 입력 placeholder나 기본 텍스트 색상 보정 */
         [data-theme="light"] input[type="time"] { color: #18181b; }
     </style>
 </head>
@@ -32,12 +31,12 @@
             <button onclick="toggleLayoutMode()" id="layout-toggle-btn" class="bg-[#27272a] hover:bg-[#3f3f46] text-zinc-200 px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1.5">
                 <span id="layout-toggle-icon">📱</span> <span id="layout-toggle-text">모바일 뷰</span>
             </button>
-            <span id="current-time-display">2026. 10. 31. (토)</span>
+            <span id="current-time-display">2026. 11. 1. (일)</span>
         </div>
     </header>
 
-    <!-- Main Workspace -->
-    <div id="main-workspace" class="flex-1 flex flex-row overflow-hidden">
+    <!-- Main Workspace (디폴트는 데스크톱: flex-row, 모바일뷰 활성화 시 flex-col로 변경) -->
+    <div id="main-workspace" class="flex-1 flex flex-row overflow-hidden transition-all duration-200">
         
         <!-- Sidebar Navigation -->
         <aside id="app-sidebar" class="w-64 bg-[#18181b] border-r border-[#27272a] flex flex-col shrink-0 overflow-y-auto transition-colors">
@@ -95,7 +94,7 @@
             <!-- Calendar Navigation Header -->
             <div id="cal-nav-header" class="h-16 border-b border-[#27272a] flex items-center justify-between px-8 shrink-0 bg-[#151518] transition-colors">
                 <div class="flex items-center gap-4">
-                    <h2 id="cal-title" class="text-xl font-bold text-zinc-100">2026년 10월</h2>
+                    <h2 id="cal-title" class="text-xl font-bold text-zinc-100">2026년 11월</h2>
                     <div id="cal-nav-btns" class="flex items-center bg-[#1d1d21] rounded-lg border border-[#27272a] p-0.5 transition-colors">
                         <button onclick="moveNav(-1)" class="p-1.5 hover:bg-[#27272a] rounded-md text-zinc-400 hover:text-white transition">◀</button>
                         <button onclick="goToday()" id="btn-today-nav" class="px-3 py-1 text-xs font-medium text-zinc-300 hover:text-white transition">오늘</button>
@@ -131,7 +130,7 @@
         <aside id="app-drawer" class="w-96 bg-[#18181b] border-l border-[#27272a] flex flex-col shrink-0 transition-colors">
             <div id="drawer-header" class="h-16 border-b border-[#27272a] flex items-center justify-between px-6 shrink-0 transition-colors">
                 <div class="flex items-center gap-2">
-                    <span id="drawer-date-title" class="text-base font-bold text-zinc-100">2026년 10월 31일</span>
+                    <span id="drawer-date-title" class="text-base font-bold text-zinc-100">2026년 11월 1일</span>
                     <span class="text-xs bg-indigo-500/20 text-indigo-400 px-2.5 py-0.5 rounded-full font-medium">선택됨</span>
                 </div>
             </div>
@@ -246,8 +245,22 @@
             return `${y}-${m}-${d}`;
         }
 
+        function updateCurrentTimeDisplay() {
+            const now = new Date();
+            const y = now.getFullYear();
+            const m = now.getMonth() + 1;
+            const d = now.getDate();
+            const weekDays = ['일', '월', '화', '수', '목', '금', '토'];
+            const w = weekDays[now.getDay()];
+            const timeEl = document.getElementById('current-time-display');
+            if (timeEl) {
+                timeEl.textContent = `${y}. ${m}. ${d}. (${w})`;
+            }
+        }
+
         function initApp() {
             applyTheme(currentTheme, false);
+            updateCurrentTimeDisplay();
             renderCalendar();
             selectDate(selectedDateStr);
             startNotificationMonitor();
@@ -271,7 +284,7 @@
             const btnTodayNav = document.getElementById('btn-today-nav');
             const drawer = document.getElementById('app-drawer');
             const drawerHeader = document.getElementById('drawer-header');
-            const drawerDateTitle = document.getElementById('drawer-date-title'); // 날짜 표시 부분
+            const drawerDateTitle = document.getElementById('drawer-date-title');
             const drawerTabBar = document.getElementById('drawer-tab-bar');
             const modalBox = document.getElementById('modal-box');
             const eventInputBox = document.getElementById('event-input-box');
@@ -291,28 +304,28 @@
                 body.className = "h-screen flex flex-col overflow-hidden bg-white text-zinc-900";
                 if(header) header.className = "h-14 bg-white border-b border-zinc-200 flex items-center justify-between px-4 md:px-6 shrink-0 transition-colors";
                 if(headerBadge) headerBadge.className = "text-xs text-zinc-600 bg-zinc-100 px-2 py-0.5 rounded hidden sm:inline-block";
-                if(sidebar) sidebar.className = "w-64 bg-zinc-50 border-r border-zinc-200 flex flex-col shrink-0 overflow-y-auto transition-colors";
+                if(sidebar) sidebar.className = (isMobileLayoutMode ? "bg-white border-b border-zinc-200 p-3 flex flex-col gap-2.5 shrink-0 transition-colors" : "w-64 bg-zinc-50 border-r border-zinc-200 flex flex-col shrink-0 overflow-y-auto transition-colors");
                 if(mainContent) mainContent.className = "flex-1 flex flex-col bg-white overflow-hidden transition-colors";
                 if(calNavHeader) calNavHeader.className = "h-16 border-b border-zinc-200 flex items-center justify-between px-8 shrink-0 bg-white transition-colors";
                 if(calNavBtns) calNavBtns.className = "flex items-center bg-zinc-100 rounded-lg border border-zinc-200 p-0.5 transition-colors";
                 if(calTitle) calTitle.className = "text-xl font-bold text-zinc-900";
                 if(btnTodayNav) btnTodayNav.className = "px-3 py-1 text-xs font-medium text-zinc-700 hover:text-zinc-950 transition";
-                if(drawer) drawer.className = "w-96 bg-zinc-50 border-l border-zinc-200 flex flex-col shrink-0 transition-colors";
+                if(drawer) drawer.className = (isMobileLayoutMode ? "bg-white border-t border-zinc-200 w-full flex flex-col shrink-0 max-h-[42vh] transition-colors" : "w-96 bg-zinc-50 border-l border-zinc-200 flex flex-col shrink-0 transition-colors");
                 if(drawerHeader) drawerHeader.className = "h-16 border-b border-zinc-200 flex items-center justify-between px-6 shrink-0 transition-colors";
-                if(drawerDateTitle) drawerDateTitle.className = "text-base font-bold text-zinc-900"; // 라이트 모드에서 날짜 진하게
+                if(drawerDateTitle) drawerDateTitle.className = "text-base font-bold text-zinc-900";
                 if(drawerTabBar) drawerTabBar.className = "h-14 border-t border-zinc-200 grid grid-cols-3 bg-zinc-100 p-2 gap-1 shrink-0 text-xs font-medium transition-colors";
                 if(modalBox) modalBox.className = "bg-white border border-zinc-200 rounded-2xl w-full max-w-md p-6 space-y-6 shadow-2xl transition-colors";
                 if(eventInputBox) eventInputBox.className = "space-y-3 bg-white p-4 rounded-xl border border-zinc-200 transition-colors";
                 if(modalInputBox) modalInputBox.className = "space-y-3 bg-white p-4 rounded-xl border border-zinc-200 transition-colors";
                 
-                const inputs = document.querySelectorAll('#event-title-input, #event-cat-input, #event-time-input, #routine-title-input, #routine-time-input');
+                const inputs = document.querySelectorAll('#event-title-input, #event-cat-input, #event-time-input, #routine-title-input, #routine-time-input, #reflection-textarea, #diary-textarea');
                 inputs.forEach(el => {
-                    el.className = el.className.replace(/bg-\[#121216\]/g, 'bg-zinc-50').replace(/border-\[#27272a\]/g, 'border-zinc-200').replace(/text-zinc-100/g, 'text-zinc-900').replace(/text-zinc-200/g, 'text-zinc-900').replace(/text-zinc-300/g, 'text-zinc-800');
+                    el.className = el.className.replace(/bg-\[#121216\]/g, 'bg-zinc-50').replace(/bg-\[#1d1d21\]/g, 'bg-white').replace(/border-\[#27272a\]/g, 'border-zinc-200').replace(/text-zinc-100/g, 'text-zinc-900').replace(/text-zinc-200/g, 'text-zinc-900').replace(/text-zinc-300/g, 'text-zinc-800').replace(/placeholder-zinc-500/g, 'placeholder-zinc-400 shadow-sm');
                 });
 
-                if(btnNotif) btnNotif.className = "w-full bg-zinc-200 hover:bg-zinc-300 text-zinc-800 text-xs font-medium py-2 px-3 rounded-lg transition flex items-center justify-center gap-1.5";
-                if(btnBackup) btnBackup.className = "bg-zinc-200 hover:bg-zinc-300 text-zinc-800 text-xs py-1.5 px-2 rounded-lg transition text-center";
-                if(btnRestore) btnRestore.className = "bg-zinc-200 hover:bg-zinc-300 text-zinc-800 text-xs py-1.5 px-2 rounded-lg transition text-center";
+                if(btnNotif) btnNotif.className = (isMobileLayoutMode ? "bg-zinc-200 text-zinc-800 text-xs font-medium py-2 px-3 rounded-lg transition flex items-center justify-center gap-1.5" : "w-full bg-zinc-200 hover:bg-zinc-300 text-zinc-800 text-xs font-medium py-2 px-3 rounded-lg transition flex items-center justify-center gap-1.5");
+                if(btnBackup) btnBackup.className = (isMobileLayoutMode ? "bg-zinc-200 text-zinc-800 text-xs py-1.5 px-2 rounded-lg transition text-center" : "bg-zinc-200 hover:bg-zinc-300 text-zinc-800 text-xs py-1.5 px-2 rounded-lg transition text-center");
+                if(btnRestore) btnRestore.className = (isMobileLayoutMode ? "bg-zinc-200 text-zinc-800 text-xs py-1.5 px-2 rounded-lg transition text-center" : "bg-zinc-200 hover:bg-zinc-300 text-zinc-800 text-xs py-1.5 px-2 rounded-lg transition text-center");
                 if(layoutToggleBtn) layoutToggleBtn.className = "bg-zinc-200 hover:bg-zinc-300 text-zinc-800 px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1.5";
                 if(themeToggleBtn) themeToggleBtn.className = "bg-zinc-200 hover:bg-zinc-300 text-zinc-800 px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1.5";
 
@@ -322,28 +335,28 @@
                 body.className = "h-screen flex flex-col overflow-hidden bg-[#121216] text-[#e4e4e7]";
                 if(header) header.className = "h-14 bg-[#18181b] border-b border-[#27272a] flex items-center justify-between px-4 md:px-6 shrink-0 transition-colors";
                 if(headerBadge) headerBadge.className = "text-xs text-zinc-400 bg-[#27272a] px-2 py-0.5 rounded hidden sm:inline-block";
-                if(sidebar) sidebar.className = "w-64 bg-[#18181b] border-r border-[#27272a] flex flex-col shrink-0 overflow-y-auto transition-colors";
+                if(sidebar) sidebar.className = (isMobileLayoutMode ? "bg-[#18181b] border-b border-[#27272a] p-3 flex flex-col gap-2.5 shrink-0 transition-colors" : "w-64 bg-[#18181b] border-r border-[#27272a] flex flex-col shrink-0 overflow-y-auto transition-colors");
                 if(mainContent) mainContent.className = "flex-1 flex flex-col bg-[#121216] overflow-hidden transition-colors";
                 if(calNavHeader) calNavHeader.className = "h-16 border-b border-[#27272a] flex items-center justify-between px-8 shrink-0 bg-[#151518] transition-colors";
                 if(calNavBtns) calNavBtns.className = "flex items-center bg-[#1d1d21] rounded-lg border border-[#27272a] p-0.5 transition-colors";
                 if(calTitle) calTitle.className = "text-xl font-bold text-zinc-100";
                 if(btnTodayNav) btnTodayNav.className = "px-3 py-1 text-xs font-medium text-zinc-300 hover:text-white transition";
-                if(drawer) drawer.className = "w-96 bg-[#18181b] border-l border-[#27272a] flex flex-col shrink-0 transition-colors";
+                if(drawer) drawer.className = (isMobileLayoutMode ? "bg-[#18181b] border-t border-[#27272a] w-full flex flex-col shrink-0 max-h-[42vh] transition-colors" : "w-96 bg-[#18181b] border-l border-[#27272a] flex flex-col shrink-0 transition-colors");
                 if(drawerHeader) drawerHeader.className = "h-16 border-b border-[#27272a] flex items-center justify-between px-6 shrink-0 transition-colors";
-                if(drawerDateTitle) drawerDateTitle.className = "text-base font-bold text-zinc-100"; // 다크 모드 날짜
+                if(drawerDateTitle) drawerDateTitle.className = "text-base font-bold text-zinc-100";
                 if(drawerTabBar) drawerTabBar.className = "h-14 border-t border-[#27272a] grid grid-cols-3 bg-[#151518] p-2 gap-1 shrink-0 text-xs font-medium transition-colors";
                 if(modalBox) modalBox.className = "bg-[#18181b] border border-[#27272a] rounded-2xl w-full max-w-md p-6 space-y-6 shadow-2xl transition-colors";
                 if(eventInputBox) eventInputBox.className = "space-y-3 bg-[#1d1d21] p-4 rounded-xl border border-[#27272a] transition-colors";
                 if(modalInputBox) modalInputBox.className = "space-y-3 bg-[#1d1d21] p-4 rounded-xl border border-[#27272a] transition-colors";
 
-                const inputs = document.querySelectorAll('#event-title-input, #event-cat-input, #event-time-input, #routine-title-input, #routine-time-input');
+                const inputs = document.querySelectorAll('#event-title-input, #event-cat-input, #event-time-input, #routine-title-input, #routine-time-input, #reflection-textarea, #diary-textarea');
                 inputs.forEach(el => {
-                    el.className = el.className.replace(/bg-zinc-50/g, 'bg-[#121216]').replace(/border-zinc-200/g, 'border-[#27272a]').replace(/text-zinc-900/g, 'text-zinc-100').replace(/text-zinc-800/g, 'text-zinc-300');
+                    el.className = el.className.replace(/bg-zinc-50/g, 'bg-[#121216]').replace(/bg-white/g, 'bg-[#1d1d21]').replace(/border-zinc-200/g, 'border-[#27272a]').replace(/text-zinc-900/g, 'text-zinc-100').replace(/text-zinc-800/g, 'text-zinc-300').replace(/shadow-sm/g, '');
                 });
 
-                if(btnNotif) btnNotif.className = "w-full bg-[#27272a] hover:bg-[#3f3f46] text-zinc-200 text-xs font-medium py-2 px-3 rounded-lg transition flex items-center justify-center gap-1.5";
-                if(btnBackup) btnBackup.className = "bg-[#27272a] hover:bg-[#3f3f46] text-zinc-300 text-xs py-1.5 px-2 rounded-lg transition text-center";
-                if(btnRestore) btnRestore.className = "bg-[#27272a] hover:bg-[#3f3f46] text-zinc-300 text-xs py-1.5 px-2 rounded-lg transition text-center";
+                if(btnNotif) btnNotif.className = (isMobileLayoutMode ? "bg-[#27272a] text-zinc-200 text-xs font-medium py-2 px-3 rounded-lg transition flex items-center justify-center gap-1.5" : "w-full bg-[#27272a] hover:bg-[#3f3f46] text-zinc-200 text-xs font-medium py-2 px-3 rounded-lg transition flex items-center justify-center gap-1.5");
+                if(btnBackup) btnBackup.className = (isMobileLayoutMode ? "bg-[#27272a] text-zinc-300 text-xs py-1.5 px-2 rounded-lg transition text-center" : "bg-[#27272a] hover:bg-[#3f3f46] text-zinc-300 text-xs py-1.5 px-2 rounded-lg transition text-center");
+                if(btnRestore) btnRestore.className = (isMobileLayoutMode ? "bg-[#27272a] text-zinc-300 text-xs py-1.5 px-2 rounded-lg transition text-center" : "bg-[#27272a] hover:bg-[#3f3f46] text-zinc-300 text-xs py-1.5 px-2 rounded-lg transition text-center");
                 if(layoutToggleBtn) layoutToggleBtn.className = "bg-[#27272a] hover:bg-[#3f3f46] text-zinc-200 px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1.5";
                 if(themeToggleBtn) themeToggleBtn.className = "bg-[#27272a] hover:bg-[#3f3f46] text-zinc-200 px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1.5";
 
@@ -353,6 +366,7 @@
             renderCalendar();
             renderEventsForSelectedDate();
             renderRoutineChecklist();
+            loadReflectionAndDiary();
         }
 
         function exportData() {
@@ -411,7 +425,11 @@
             reader.readAsText(file);
         }
 
+        let isLayoutToggling = false;
         function toggleLayoutMode() {
+            if (isLayoutToggling) return;
+            isLayoutToggling = true;
+
             isMobileLayoutMode = !isMobileLayoutMode;
             const workspace = document.getElementById('main-workspace');
             const sidebar = document.getElementById('app-sidebar');
@@ -419,82 +437,29 @@
             const iconEl = document.getElementById('layout-toggle-icon');
             const textEl = document.getElementById('layout-toggle-text');
 
+            // HTML 내부 내용을 지우고 새로 쓰지 않고, CSS 클래스 구조와 방향만 안전하게 토글합니다.
             if (isMobileLayoutMode) {
-                workspace.className = "flex-1 flex flex-col overflow-hidden";
-                sidebar.className = (currentTheme === 'light' ? "bg-white border-b border-zinc-200" : "bg-[#18181b] border-b border-[#27272a]") + " p-3 flex flex-col gap-2.5 shrink-0 transition-colors";
-                sidebar.innerHTML = `
-                    <div class="flex items-center justify-between gap-2">
-                        <button onclick="openModal('routine')" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2.5 px-4 rounded-xl transition text-xs flex items-center justify-center gap-2 shadow-md shadow-indigo-600/20">
-                            <span>⚡ 루틴 관리</span>
-                        </button>
-                        <button onclick="requestNotificationPermission()" class="${currentTheme === 'light' ? 'bg-zinc-200 text-zinc-800' : 'bg-[#27272a] text-zinc-200'} text-xs font-medium py-2.5 px-3 rounded-xl transition flex items-center justify-center gap-1.5">
-                            <span>🔔 알림</span>
-                        </button>
-                    </div>
-                    <div class="flex items-center justify-between gap-2">
-                        <button onclick="exportData()" class="flex-1 ${currentTheme === 'light' ? 'bg-zinc-200 text-zinc-800' : 'bg-[#27272a] text-zinc-300'} text-xs py-2 px-3 rounded-xl transition text-center font-medium">💾 백업</button>
-                        <button onclick="document.getElementById('import-file').click()" class="flex-1 ${currentTheme === 'light' ? 'bg-zinc-200 text-zinc-800' : 'bg-[#27272a] text-zinc-300'} text-xs py-2 px-3 rounded-xl transition text-center font-medium">📂 복원</button>
-                        <input type="file" id="import-file" accept=".json" class="hidden" onchange="importData(event)">
-                    </div>
-                    <div id="notif-status" class="text-[11px] text-center text-zinc-400">알림 대기중</div>
-                `;
-                drawer.className = (currentTheme === 'light' ? "bg-white border-t border-zinc-200" : "bg-[#18181b] border-t border-[#27272a]") + " w-full flex flex-col shrink-0 max-h-[42vh] transition-colors";
+                workspace.className = "flex-1 flex flex-col overflow-hidden transition-all duration-200";
+                sidebar.className = (currentTheme === 'light' ? "bg-white border-b border-zinc-200" : "bg-[#18181b] border-b border-[#27272a]") + " p-3 flex flex-row gap-2 shrink-0 items-center justify-between transition-colors overflow-x-auto";
+                sidebar.style.width = "100%";
+                drawer.className = (currentTheme === 'light' ? "bg-white border-t border-zinc-200" : "bg-[#18181b] border-t border-[#27272a]") + " w-full flex flex-col shrink-0 max-h-[40vh] transition-colors";
                 iconEl.textContent = "💻";
                 textEl.textContent = "데스크톱 모드";
             } else {
-                applyTheme(currentTheme, false);
+                workspace.className = "flex-1 flex flex-row overflow-hidden transition-all duration-200";
                 sidebar.className = (currentTheme === 'light' ? "bg-zinc-50 border-r border-zinc-200" : "bg-[#18181b] border-r border-[#27272a]") + " w-64 flex flex-col shrink-0 overflow-y-auto transition-colors";
-                sidebar.innerHTML = `
-                    <div class="p-4 border-b ${currentTheme === 'light' ? 'border-zinc-200' : 'border-[#27272a]'} shrink-0">
-                        <button onclick="openModal('routine')" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2.5 px-4 rounded-xl transition text-sm flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/20">
-                            <span>⚡ 루틴 관리</span>
-                        </button>
-                    </div>
-                    <div class="flex-1 p-4 space-y-6 overflow-y-auto">
-                        <div>
-                            <h3 class="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">Navigation</h3>
-                            <nav class="space-y-1">
-                                <button onclick="switchDrawerTab('schedule')" id="nav-schedule" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium ${currentTheme === 'light' ? 'bg-zinc-200 text-zinc-900' : 'bg-[#27272a] text-white'} transition">📅 일정</button>
-                                <button onclick="switchDrawerTab('reflection')" id="nav-reflection" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-zinc-400 hover:bg-zinc-100 dark:hover:bg-[#202024] transition">📝 정리</button>
-                                <button onclick="switchDrawerTab('diary')" id="nav-diary" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-zinc-400 hover:bg-zinc-100 dark:hover:bg-[#202024] transition">📖 일기</button>
-                            </nav>
-                        </div>
-                        <div>
-                            <h3 class="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">Categories</h3>
-                            <div class="space-y-1 text-sm">
-                                <label class="flex items-center gap-2 px-3 py-1.5 rounded hover:bg-zinc-100 dark:hover:bg-[#202024] cursor-pointer">
-                                    <input type="checkbox" checked class="accent-indigo-500" onchange="toggleCategory('work', this)">
-                                    <span class="w-2 h-2 rounded-full bg-blue-500"></span> 업무/공부
-                                </label>
-                                <label class="flex items-center gap-2 px-3 py-1.5 rounded hover:bg-zinc-100 dark:hover:bg-[#202024] cursor-pointer">
-                                    <input type="checkbox" checked class="accent-indigo-500" onchange="toggleCategory('personal', this)">
-                                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span> 개인 일정
-                                </label>
-                                <label class="flex items-center gap-2 px-3 py-1.5 rounded hover:bg-zinc-100 dark:hover:bg-[#202024] cursor-pointer">
-                                    <input type="checkbox" checked class="accent-indigo-500" onchange="toggleCategory('health', this)">
-                                    <span class="w-2 h-2 rounded-full bg-amber-500"></span> 운동/루틴
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="p-4 border-t ${currentTheme === 'light' ? 'border-zinc-200' : 'border-[#27272a]'} space-y-2 shrink-0">
-                        <button onclick="requestNotificationPermission()" id="btn-notif" class="w-full ${currentTheme === 'light' ? 'bg-zinc-200 hover:bg-zinc-300 text-zinc-800' : 'bg-[#27272a] hover:bg-[#3f3f46] text-zinc-200'} text-xs font-medium py-2 px-3 rounded-lg transition flex items-center justify-center gap-1.5">
-                            <span>🔔 알림 설정</span>
-                        </button>
-                        <div class="grid grid-cols-2 gap-1.5">
-                            <button onclick="exportData()" id="btn-backup" class="${currentTheme === 'light' ? 'bg-zinc-200 hover:bg-zinc-300 text-zinc-800' : 'bg-[#27272a] hover:bg-[#3f3f46] text-zinc-300'} text-xs py-1.5 px-2 rounded-lg transition text-center">💾 백업</button>
-                            <button onclick="document.getElementById('import-file').click()" id="btn-restore" class="${currentTheme === 'light' ? 'bg-zinc-200 hover:bg-zinc-300 text-zinc-800' : 'bg-[#27272a] hover:bg-[#3f3f46] text-zinc-300'} text-xs py-1.5 px-2 rounded-lg transition text-center">📂 복원</button>
-                            <input type="file" id="import-file" accept=".json" class="hidden" onchange="importData(event)">
-                        </div>
-                        <div id="notif-status" class="text-[11px] text-center text-zinc-400 pt-1">대기중</div>
-                    </div>
-                `;
+                sidebar.style.width = "16rem";
                 drawer.className = (currentTheme === 'light' ? "bg-zinc-50 border-l border-zinc-200" : "bg-[#18181b] border-l border-[#27272a]") + " w-96 flex flex-col shrink-0 transition-colors";
                 iconEl.textContent = "📱";
                 textEl.textContent = "모바일 뷰";
             }
+
             renderCalendar();
             selectDate(selectedDateStr);
+
+            setTimeout(() => {
+                isLayoutToggling = false;
+            }, 200);
         }
 
         function requestNotificationPermission() {
@@ -519,6 +484,8 @@
 
         function startNotificationMonitor() {
             setInterval(() => {
+                updateCurrentTimeDisplay();
+
                 const now = new Date();
                 const todayStr = formatDateKey(now);
                 const currentHour = String(now.getHours()).padStart(2, '0');
@@ -545,7 +512,7 @@
                         }
                     }
                 });
-            }, 10000);
+            }, 1000);
         }
 
         function renderCalendar() {
@@ -948,14 +915,14 @@
                 let drawerTabEl = document.getElementById(`drawer-tab-${t}`);
                 let navEl = document.getElementById(`nav-${t}`);
                 if (tabEl) tabEl.classList.add('hidden');
-                if (drawerTabEl) drawerTabEl.className = "text-zinc-400 hover:text-white rounded-lg transition flex items-center justify-center";
+                if (drawerTabEl) drawerTabEl.className = currentTheme === 'light' ? "text-zinc-500 hover:text-zinc-900 rounded-lg transition flex items-center justify-center" : "text-zinc-400 hover:text-white rounded-lg transition flex items-center justify-center";
                 if (navEl) navEl.className = `w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-zinc-400 hover:${currentTheme === 'light' ? 'bg-zinc-100 text-zinc-900' : 'bg-[#202024] text-white'} transition`;
             });
             let targetTab = document.getElementById(`tab-${tab}`);
             let targetDrawerTab = document.getElementById(`drawer-tab-${tab}`);
             let targetNav = document.getElementById(`nav-${tab}`);
             if (targetTab) targetTab.classList.remove('hidden');
-            if (targetDrawerTab) targetDrawerTab.className = "bg-[#27272a] text-white rounded-lg transition flex items-center justify-center";
+            if (targetDrawerTab) targetDrawerTab.className = currentTheme === 'light' ? "bg-white text-zinc-900 shadow-sm rounded-lg transition flex items-center justify-center font-semibold" : "bg-[#27272a] text-white rounded-lg transition flex items-center justify-center";
             if (targetNav) targetNav.className = `w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium ${currentTheme === 'light' ? 'bg-zinc-200 text-zinc-900' : 'bg-[#27272a] text-white'} transition`;
         }
 
