@@ -73,14 +73,14 @@
                 </div>
             </div>
 
-            <!-- 알림 권한 및 백업/복원 영역 -->
+            <!-- 알림 권한 및 백업/복원 영역 (차분한 톤으로 수정) -->
             <div class="p-3 lg:p-4 border-l lg:border-l-0 lg:border-t border-[#27272a] space-y-2 shrink-0 flex flex-col justify-center">
                 <button onclick="requestNotificationPermission()" class="bg-[#27272a] hover:bg-[#3f3f46] text-zinc-200 text-[11px] lg:text-xs font-medium py-1.5 lg:py-2 px-2.5 lg:px-3 rounded-lg transition flex items-center justify-center gap-1.5 whitespace-nowrap">
                     <span>🔔 알림 설정</span>
                 </button>
                 <div class="grid grid-cols-2 gap-1">
-                    <button onclick="exportData()" class="bg-indigo-950/60 hover:bg-indigo-900/60 text-indigo-300 text-[10px] lg:text-[11px] py-1 px-1.5 rounded transition text-center">💾 백업</button>
-                    <button onclick="document.getElementById('import-file').click()" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-[10px] lg:text-[11px] py-1 px-1.5 rounded transition text-center">📂 복원</button>
+                    <button onclick="exportData()" class="bg-[#27272a] hover:bg-[#3f3f46] text-zinc-300 text-[10px] lg:text-[11px] py-1.5 px-1.5 rounded-lg transition text-center">💾 백업</button>
+                    <button onclick="document.getElementById('import-file').click()" class="bg-[#27272a] hover:bg-[#3f3f46] text-zinc-300 text-[10px] lg:text-[11px] py-1.5 px-1.5 rounded-lg transition text-center">📂 복원</button>
                     <input type="file" id="import-file" accept=".json" class="hidden" onchange="importData(event)">
                 </div>
                 <div id="notif-status" class="text-[10px] lg:text-[11px] text-center text-zinc-400">대기중</div>
@@ -254,7 +254,6 @@
             }
         }
 
-        // 백업(내보내기) 기능
         function exportData() {
             const backupData = {
                 events: dbEvents,
@@ -274,7 +273,6 @@
             downloadAnchor.remove();
         }
 
-        // 복원(불러오기) 기능
         function importData(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -307,7 +305,7 @@
                 } catch (err) {
                     alert("파일을 읽는 중 오류가 발생했습니다.");
                 }
-                event.target.value = ''; // 파일 입력 초기화
+                event.target.value = '';
             };
             reader.readAsText(file);
         }
